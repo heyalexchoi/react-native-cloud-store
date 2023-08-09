@@ -582,7 +582,12 @@ extension CloudStoreModule {
                 // stop query when one file progress is 100
                 if downloading == false && downloadingProgress == 100 {
                     ended = true
-                    resolve(nil)
+                    // multiple event observers call this callback and can get to this completion condition
+                    // to prevent callback from calling more than once, we stop query and only call back if query not stopped yet
+                    if (!query.isStopped) {
+                        resolve(nil)
+                    }
+                    query.stop()
                 } else if let error = error {
                     reject("ERR_DOWNLOAD_ICLOUD_FILE", error.localizedDescription, error)
                 }
